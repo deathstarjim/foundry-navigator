@@ -66,15 +66,16 @@ The module includes screen reader live-region announcements for several Foundry 
 - HP / damage changes on owned actors
 - status effects and condition changes on owned actors
 
-There is also an `Alt+R` shortcut to re-read the most recent roll result.
+There is also an `Alt+Shift+R` shortcut to re-read the most recent roll result.
 
 ### Helpful Keyboard Shortcuts
 
 Current shortcuts include:
 
 - `Alt+T`: return focus to the active sheet tab
-- `Alt+R`: read the latest roll result
-- `Alt+C`: open your current character sheet
+- `Alt+Shift+R`: read the latest roll result
+- `Alt+Shift+C`: open your current character sheet
+- `Alt+Shift+M`: focus the chat message box
 - `Alt+Shift+A`: open Foundry Navigator settings
 - `Alt+Shift+K`: open Configure Controls
 - `W`: announce the controlled token's current position, HP, and conditions

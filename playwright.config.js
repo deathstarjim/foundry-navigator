@@ -2,12 +2,13 @@
 // Assumptions:
 // - Foundry is already running at http://localhost:30000
 // - A world is already up and reachable
-// - The player "TesterTheBrave" can join without a password
+// - The player "Tester The Brave" can join without a password
 const { defineConfig } = require("@playwright/test");
 
 module.exports = defineConfig({
     testDir: "./tests/playwright",
     timeout: 60_000,
+    workers: 1,
     expect: {
         timeout: 10_000,
     },

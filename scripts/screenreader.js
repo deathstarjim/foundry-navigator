@@ -123,7 +123,7 @@ Hooks.on("init", () =>
     game.keybindings.register('foundry-navigator', 'readLastRollResult', {
         name: 'Read Last Roll Result',
         hint: 'Announces the most recent roll result from chat.',
-        editable: [{ key: 'KeyR', modifiers: ['Alt'] }],
+        editable: [{ key: 'KeyR', modifiers: ['Alt', 'Shift'] }],
         onDown: () =>
         {
             const message = getLatestRollMessage();
@@ -169,11 +169,21 @@ Hooks.on("init", () =>
 
     game.keybindings.register('foundry-navigator', 'openMyCharacterSheet', {
         name: 'Open My Character Sheet',
-        hint: 'Opens your current character sheet using your controlled token first, then your assigned character. Default: Alt+C. You can change this in Configure Controls.',
-        editable: [{ key: 'KeyC', modifiers: ['Alt'] }],
+        hint: 'Opens your current character sheet using your controlled token first, then your assigned character. Default: Alt+Shift+C. You can change this in Configure Controls.',
+        editable: [{ key: 'KeyC', modifiers: ['Alt', 'Shift'] }],
         onDown: () =>
         {
             void openPreferredCharacterSheet();
+            return true;
+        },
+    });
+    game.keybindings.register('foundry-navigator', 'focusChatMessageBox', {
+        name: 'Focus Chat Message Box',
+        hint: 'Moves keyboard focus to the chat message input. Default: Alt+Shift+M. You can change this in Configure Controls.',
+        editable: [{ key: 'KeyM', modifiers: ['Alt', 'Shift'] }],
+        onDown: () =>
+        {
+            focusChatMessageBox();
             return true;
         },
     });
@@ -429,6 +439,54 @@ function isChatInputElement(element)
 
     return !!element.closest("#chat-form, #chat, .chat-sidebar")
         && element.matches("input, textarea, [contenteditable='true']");
+}
+function isVisibleChatInput(element)
+{
+    if (!(element instanceof HTMLElement)) return false;
+    if (element.hidden) return false;
+    if (element.closest("[hidden], [inert], .hidden")) return false;
+
+    const style = getComputedStyle(element);
+    return style.display !== "none"
+        && style.visibility !== "hidden"
+        && style.visibility !== "collapse";
+}
+
+function getChatMessageInput()
+{
+    const selectors = [
+        "#chat-message",
+        "#chat-form textarea",
+        "#chat-form input[type='text']",
+        "#chat-form [contenteditable='true']",
+        "#chat textarea",
+        "#chat input[type='text']",
+        ".chat-sidebar textarea",
+        ".chat-sidebar input[type='text']",
+        ".chat-sidebar [contenteditable='true']",
+    ];
+
+    for (const selector of selectors)
+    {
+        const candidate = document.querySelector(selector);
+        if (candidate instanceof HTMLElement && isVisibleChatInput(candidate)) return candidate;
+    }
+
+    return null;
+}
+
+function focusChatMessageBox()
+{
+    const input = getChatMessageInput();
+    if (!(input instanceof HTMLElement))
+    {
+        announceAssertive("Chat message box is not available.");
+        return false;
+    }
+
+    input.focus({ preventScroll: false });
+    announcePolite("Chat message box focused.");
+    return true;
 }
 
 function shouldMoveInitialFocus(element)

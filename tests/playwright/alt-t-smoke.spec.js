@@ -243,6 +243,35 @@ async function chooseNormalRoll(page)
     await normalButton.click();
 }
 
+test("Alt+Shift+M moves focus from the canvas to the chat message box", async ({ page }) =>
+{
+    await joinAsTester(page);
+
+    await page.evaluate(() =>
+    {
+        const canvasTarget = canvas?.app?.view
+            ?? document.querySelector("#board canvas")
+            ?? document.querySelector("#board")
+            ?? document.body;
+        if (!canvasTarget.hasAttribute("tabindex") && !canvasTarget.matches("button, input, select, textarea, a[href]"))
+        {
+            canvasTarget.tabIndex = -1;
+        }
+        canvasTarget.focus({ preventScroll: true });
+    });
+
+    await page.waitForFunction(() =>
+    {
+        const activeElement = document.activeElement;
+        return activeElement instanceof HTMLElement
+            && (activeElement === canvas?.app?.view || activeElement.closest?.("#board") || activeElement === document.body);
+    }, null, { timeout: 10000 });
+
+    await page.keyboard.press("Alt+Shift+M");
+
+    const chatTextbox = page.getByRole("textbox", { name: /chat/i });
+    await expect(chatTextbox).toBeFocused({ timeout: 10000 });
+});
 test("Alt+T returns focus to the active tab well on the current character sheet", async ({ page }) =>
 {
     await joinAsTester(page);

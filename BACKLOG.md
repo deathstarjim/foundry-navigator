@@ -1,6 +1,6 @@
 # Foundry Navigator - Backlog
 
-Items are grouped by theme. Priorities are relative to Michael's needs as a blind player.
+Items are grouped by theme. Priorities are relative to blind and low-vision player needs.
 All features should be `scope: 'client'` (per-player opt-in) unless noted.
 
 ---
@@ -10,7 +10,7 @@ All features should be `scope: 'client'` (per-player opt-in) unless noted.
 
 - [ ] **Grid label overlay** - PIXI canvas layer that draws letter (A, B, C...) column headers along the top of the scene and number (1, 2, 3...) row headers down the left side, in world-space so they pan/zoom with the map. Semi-transparent so they do not obscure the map for sighted players. Toggleable per-client.
 - [x] **Coordinate helper function** - shared utility `getGridLabel(token)` -> `"C3"` used by all announcement features below.
-- [ ] **Persistent HUD readout** - small always-visible HTML overlay in a screen corner showing the controlled token's current grid position and HP (for example `Thorin - C3 - HP 22/30`). Useful for sighted players helping Michael navigate.
+- [ ] **Persistent HUD readout** - small always-visible HTML overlay in a screen corner showing the controlled token's current grid position and HP (for example `Thorin - C3 - HP 22/30`). Useful for sighted players helping blind and low-vision players navigate.
 
 ---
 
@@ -21,13 +21,13 @@ All features should be `scope: 'client'` (per-player opt-in) unless noted.
 - [x] **Token enter/leave scene** - announce when a token is added to or removed from the canvas (for example "Goblin King has entered the scene.").
 - [x] **HP / damage changes** - announce damage or healing on owned and optionally targeted tokens (for example "Thorin takes 8 damage. 22 of 30 HP remaining.").
 - [x] **Status effects / conditions** - announce when a condition is applied to or removed from an owned token (for example "Prone applied to Thorin." / "Frightened 1 removed.").
-- [x] **Dice roll results** - announce the result and total of any roll in chat (for example "Attack roll: 17."). Includes an `Alt+R` fallback to re-read the latest roll result from chat on demand.
+- [x] **Dice roll results** - announce the result and total of any roll in chat (for example "Attack roll: 17."). Includes an `Alt+Shift+R` fallback to re-read the latest roll result from chat on demand.
 - [x] **Combat tunnel step narration** - expand the existing dialog narration so target selection, attack confirmation, damage application, and recovery/focus transitions are consistently announced from start to finish.
 
 ---
 
 ## Keyboard and No-Mouse Navigation
-*Reducing the need for click-and-drag is the highest-value area for Michael.*
+*Reducing the need for click-and-drag is the highest-value area for blind and low-vision players.*
 
 - [x] **"Where am I" hotkey** - configurable keybind (default: `W`) that re-reads the controlled token's position, HP, and any active conditions via the assertive live region. Works on demand without any interaction.
 - [x] **Initial token selection / open sheet flow** - provide a keyboard-first way on initial world load to find owned tokens, select or control one, and open its character sheet without needing a mouse or pre-existing canvas focus.
