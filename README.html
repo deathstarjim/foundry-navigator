@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foundry Navigator</title>
+</head>
+<body>
+  <h1>Foundry Navigator</h1>
+
+  <p>
+    Foundry Navigator adds keyboard-first and screen-reader-friendly improvements to Foundry VTT, with the current implementation focused on <strong>D&amp;D 5e on Foundry VTT v13</strong>.
+  </p>
+
+  <h2>Current Scope</h2>
+  <ul>
+    <li>Foundry VTT v13</li>
+    <li>D&amp;D 5e system</li>
+    <li>Tidy 5e Sheets and default D&amp;D 5e actor sheets</li>
+  </ul>
+
+  <h2>What It Does</h2>
+
+  <h3>Character Sheet Keyboard Navigation</h3>
+  <ul>
+    <li><code>Alt+T</code> returns focus to the active sheet tab</li>
+    <li><code>Tab</code> and <code>Shift+Tab</code> move between supported tab controls</li>
+    <li><code>Enter</code> activates tabs</li>
+    <li>Lets keyboard users move into the active panel and cycle through controls more predictably</li>
+    <li><code>Escape</code> and <code>Ctrl+Shift+Tab</code> help users leave sheet focus modes cleanly</li>
+    <li>Provides spoken guidance when keyboard focus first enters a supported character sheet</li>
+  </ul>
+
+  <p>Supported today:</p>
+  <ul>
+    <li>Default D&amp;D 5e actor sheets</li>
+    <li>Tidy 5e character sheets</li>
+  </ul>
+
+  <h3>Inventory, Spell, and Action Flows</h3>
+  <ul>
+    <li>Keyboard navigation for inventory row actions</li>
+    <li>Keyboard support for spell and feature rows</li>
+    <li>Support for attack and use/roll buttons</li>
+    <li>Item context menu support on Tidy 5e sheets</li>
+    <li>Improved focus handling through roll configuration dialogs</li>
+    <li>Restores focus back to the originating row after many attack and consumable flows</li>
+  </ul>
+
+  <h3>Keyboard-First Target Selection and Combat Follow-Up</h3>
+  <ul>
+    <li>Keyboard target selection dialogs</li>
+    <li>Distance-aware target ordering</li>
+    <li>Self-first consumable targeting when appropriate</li>
+    <li>Hit or miss follow-up dialogs</li>
+    <li>Direct damage and healing application flows</li>
+    <li>GM-mediated damage and healing application for players acting on unowned hostile tokens</li>
+  </ul>
+
+  <h3>Screen Reader Announcements</h3>
+  <ul>
+    <li>Chat messages and roll results</li>
+    <li>Combat turn changes</li>
+    <li>UI notifications</li>
+    <li>Token movement</li>
+    <li>Tokens entering or leaving the current scene</li>
+    <li>HP and damage changes on owned actors</li>
+    <li>Status effect and condition changes on owned actors</li>
+    <li><code>Alt+R</code> re-reads the most recent roll result</li>
+  </ul>
+
+  <h3>Helpful Keyboard Shortcuts</h3>
+  <ul>
+    <li><code>Alt+T</code></li>
+    <li><code>Alt+R</code></li>
+    <li><code>Alt+C</code></li>
+    <li><code>Alt+Shift+A</code></li>
+    <li><code>Alt+Shift+K</code></li>
+    <li><code>W</code></li>
+    <li><code>Enter</code> and <code>Shift+Enter</code></li>
+    <li>Many shortcuts can be changed through Foundry's controls configuration</li>
+  </ul>
+
+  <h2>Installation</h2>
+  <p>
+    Install using the module manifest from the latest GitHub release. For development builds, make sure the published
+    <code>module.json</code> and downloadable module zip stay in sync and that <code>module.json</code> is at the root of the zip.
+  </p>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>The strongest support is currently on D&amp;D 5e</li>
+    <li>Tidy 5e and default D&amp;D 5e sheets are the primary supported sheet types</li>
+    <li>Navigation and screen-reader support is still actively evolving</li>
+  </ul>
+
+  <h2>Acknowledgments</h2>
+  <p>
+    This project was inspired in part by earlier Foundry accessibility work from Cora (silvative), including the Accessibility Enhancements module. Foundry Navigator is maintained as its own D&amp;D 5e-focused module.
+  </p>
+
+  <h2>Bugs and Enhancements</h2>
+  <p>
+    Please submit bug reports and enhancement requests through
+    <a href="https://github.com/deathstarjim/foundry-navigator/issues">GitHub Issues</a>.
+  </p>
+  <p>Helpful details include:</p>
+  <ul>
+    <li>Foundry version</li>
+    <li>System version</li>
+    <li>Sheet type in use</li>
+    <li>Other relevant modules</li>
+    <li>Clear reproduction steps</li>
+  </ul>
+  <p>
+    For enhancement requests, it helps to describe the table workflow problem you are trying to solve and what the ideal keyboard or screen reader workflow would look like.
+  </p>
+
+  <h2>Screenshots</h2>
+  <p>The image set still needs a refresh, but good candidates would be:</p>
+  <ul>
+    <li>Default D&amp;D 5e sheet with active tab focus</li>
+    <li>Tidy 5e inventory actions</li>
+    <li>Target picker dialog</li>
+    <li>Foundry Navigator settings or controls panel</li>
+  </ul>
+
+  <h2>Contributing</h2>
+  <p>
+    Code contributions are welcome, and direct feedback from screen reader users is especially valuable.
+  </p>
+</body>
+</html>
