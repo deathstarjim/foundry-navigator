@@ -38,11 +38,14 @@ test("extracted sheettabs modules expose the expected integration points", () =>
     const sheettabs = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs.js"), "utf8");
     const rollApplication = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs", "roll-application.js"), "utf8");
     const itemUseIntercept = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs", "item-use-intercept.js"), "utf8");
+    const globalKeyboardRouting = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs", "global-keyboard-routing.js"), "utf8");
 
     expect(sheettabs).toContain('from "./sheettabs/roll-application.js"');
     expect(sheettabs).toContain('from "./sheettabs/item-use-intercept.js"');
+    expect(sheettabs).toContain('from "./sheettabs/global-keyboard-routing.js"');
     expect(sheettabs).toContain("createRollApplicationHandlers");
     expect(sheettabs).toContain("createFocusedItemUseIntercept");
+    expect(sheettabs).toContain("registerGlobalSheetKeyboardRouting");
 
     expect(rollApplication).toContain("export function createRollApplicationHandlers");
     expect(rollApplication).toContain("export function getRollTotalValue");
@@ -52,6 +55,10 @@ test("extracted sheettabs modules expose the expected integration points", () =>
     expect(itemUseIntercept).toContain("export function createFocusedItemUseIntercept");
     expect(itemUseIntercept).toContain("libWrapper.register");
     expect(itemUseIntercept).toContain("CONFIG.Item.documentClass.prototype.use");
+
+    expect(globalKeyboardRouting).toContain("export function registerGlobalSheetKeyboardRouting");
+    expect(globalKeyboardRouting).toContain("window.addEventListener(\"keydown\"");
+    expect(globalKeyboardRouting).toContain("global Tab redirected into sheet");
 });
 test("screen reader shortcuts use shifted Alt defaults for roll readout and character sheet", () =>
 {

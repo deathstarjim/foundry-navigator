@@ -484,7 +484,11 @@ function focusChatMessageBox()
         return false;
     }
 
-    input.focus({ preventScroll: false });
+    const focusInput = () => input.focus({ preventScroll: false });
+    focusInput();
+    requestAnimationFrame(focusInput);
+    setTimeout(focusInput, 0);
+    setTimeout(focusInput, 50);
     announcePolite("Chat message box focused.");
     return true;
 }
