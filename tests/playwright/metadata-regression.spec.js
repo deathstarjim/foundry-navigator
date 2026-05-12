@@ -66,7 +66,7 @@ test("screen reader shortcuts use shifted Alt defaults for roll readout and char
 
     expect(screenreader).toContain("editable: [{ key: 'KeyR', modifiers: ['Alt', 'Shift'] }]");
     expect(screenreader).toContain("editable: [{ key: 'KeyC', modifiers: ['Alt', 'Shift'] }]");
-    expect(screenreader).toContain("editable: [{ key: 'KeyM', modifiers: ['Alt', 'Shift'] }]");
     expect(screenreader).not.toContain("editable: [{ key: 'KeyR', modifiers: ['Alt'] }]");
     expect(screenreader).not.toContain("editable: [{ key: 'KeyC', modifiers: ['Alt'] }]");
+    expect(screenreader).not.toContain("focusChatMessageBox");
 });

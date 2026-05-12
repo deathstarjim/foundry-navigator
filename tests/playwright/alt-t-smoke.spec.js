@@ -19,8 +19,19 @@ test.beforeEach(async ({ page }) =>
 
 async function waitForGameReady(page)
 {
-    await page.waitForURL("**/game", { timeout: 15000 });
-    await page.waitForFunction(() => Boolean(game.ready), null, { timeout: 15000 });
+    await page.waitForURL("**/game", { timeout: 30000 });
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForFunction(() =>
+    {
+        const hasGame = typeof window !== "undefined" && Boolean(window.game);
+        const hasUi = typeof window !== "undefined" && Boolean(window.ui);
+        const ready = Boolean(window.game?.ready);
+        const canvasReady = Boolean(window.canvas?.ready);
+        const activeUser = Boolean(window.game?.user?.id);
+        const sidebarReady = Boolean(document.querySelector("#sidebar, #ui-right"));
+
+        return hasGame && hasUi && ready && canvasReady && activeUser && sidebarReady;
+    }, null, { timeout: 45000 });
 }
 
 async function joinAsTester(page)
@@ -236,6 +247,18 @@ async function expectFocusInside(page, container)
     }, await container.elementHandle(), { timeout: 25000 });
 }
 
+async function expectTargetPickerReady(page)
+{
+    const targetPickerForm = page.locator(".fn-target-picker__form").filter({ visible: true }).last();
+    await expectFocusInside(page, targetPickerForm);
+
+    const firstTargetChoice = targetPickerForm.locator('input[name="fn-target-choice"]').first();
+    await expect(firstTargetChoice).toBeVisible({ timeout: 25000 });
+    await expect(firstTargetChoice).toBeFocused({ timeout: 25000 });
+
+    return targetPickerForm;
+}
+
 async function chooseNormalRoll(page)
 {
     const normalButton = page.getByRole("button", { name: /Normal/i }).last();
@@ -243,35 +266,6 @@ async function chooseNormalRoll(page)
     await normalButton.click();
 }
 
-test("Alt+Shift+M moves focus from the canvas to the chat message box", async ({ page }) =>
-{
-    await joinAsTester(page);
-
-    await page.evaluate(() =>
-    {
-        const canvasTarget = canvas?.app?.view
-            ?? document.querySelector("#board canvas")
-            ?? document.querySelector("#board")
-            ?? document.body;
-        if (!canvasTarget.hasAttribute("tabindex") && !canvasTarget.matches("button, input, select, textarea, a[href]"))
-        {
-            canvasTarget.tabIndex = -1;
-        }
-        canvasTarget.focus({ preventScroll: true });
-    });
-
-    await page.waitForFunction(() =>
-    {
-        const activeElement = document.activeElement;
-        return activeElement instanceof HTMLElement
-            && (activeElement === canvas?.app?.view || activeElement.closest?.("#board") || activeElement === document.body);
-    }, null, { timeout: 10000 });
-
-    await page.keyboard.press("Alt+Shift+M");
-
-    const chatTextbox = page.getByRole("textbox", { name: /chat/i });
-    await expect(chatTextbox).toBeFocused({ timeout: 10000 });
-});
 test("Alt+T returns focus to the active tab well on the current character sheet", async ({ page }) =>
 {
     await joinAsTester(page);
@@ -327,10 +321,10 @@ test("combat tunnel keeps focus anchored through targeting and damage flow", asy
     await firstWeaponUseButton.focus();
     await expect(firstWeaponUseButton).toBeFocused();
 
-    await page.keyboard.press("Enter");
+    await page.keyboard.down("Enter");
 
-    const targetPicker = page.locator(".fn-target-picker").filter({ visible: true }).last();
-    await expectFocusInside(page, targetPicker);
+    const targetPicker = await expectTargetPickerReady(page);
+    await page.keyboard.up("Enter");
 
     const confirmTargetButton = targetPicker.locator('button[type="submit"], .dialog-buttons button').last();
     await expect(confirmTargetButton).toBeVisible({ timeout: 25000 });
@@ -370,10 +364,6 @@ test("combat tunnel keeps focus anchored through targeting and damage flow", asy
             && activeElement.classList.contains("tidy-table-row-use-button");
     }, null, { timeout: 25000 });
 });
-
-
-
-
 
 
 

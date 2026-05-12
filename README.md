@@ -75,7 +75,6 @@ Current shortcuts include:
 - `Alt+T`: return focus to the active sheet tab
 - `Alt+Shift+R`: read the latest roll result
 - `Alt+Shift+C`: open your current character sheet
-- `Alt+Shift+M`: focus the chat message box
 - `Alt+Shift+A`: open Foundry Navigator settings
 - `Alt+Shift+K`: open Configure Controls
 - `W`: announce the controlled token's current position, HP, and conditions

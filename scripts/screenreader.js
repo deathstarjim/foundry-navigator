@@ -177,17 +177,6 @@ Hooks.on("init", () =>
             return true;
         },
     });
-    game.keybindings.register('foundry-navigator', 'focusChatMessageBox', {
-        name: 'Focus Chat Message Box',
-        hint: 'Moves keyboard focus to the chat message input. Default: Alt+Shift+M. You can change this in Configure Controls.',
-        editable: [{ key: 'KeyM', modifiers: ['Alt', 'Shift'] }],
-        onDown: () =>
-        {
-            focusChatMessageBox();
-            return true;
-        },
-    });
-
 });
 
 // ---------------------------------------------------------------------------
@@ -440,59 +429,6 @@ function isChatInputElement(element)
     return !!element.closest("#chat-form, #chat, .chat-sidebar")
         && element.matches("input, textarea, [contenteditable='true']");
 }
-function isVisibleChatInput(element)
-{
-    if (!(element instanceof HTMLElement)) return false;
-    if (element.hidden) return false;
-    if (element.closest("[hidden], [inert], .hidden")) return false;
-
-    const style = getComputedStyle(element);
-    return style.display !== "none"
-        && style.visibility !== "hidden"
-        && style.visibility !== "collapse";
-}
-
-function getChatMessageInput()
-{
-    const selectors = [
-        "#chat-message",
-        "#chat-form textarea",
-        "#chat-form input[type='text']",
-        "#chat-form [contenteditable='true']",
-        "#chat textarea",
-        "#chat input[type='text']",
-        ".chat-sidebar textarea",
-        ".chat-sidebar input[type='text']",
-        ".chat-sidebar [contenteditable='true']",
-    ];
-
-    for (const selector of selectors)
-    {
-        const candidate = document.querySelector(selector);
-        if (candidate instanceof HTMLElement && isVisibleChatInput(candidate)) return candidate;
-    }
-
-    return null;
-}
-
-function focusChatMessageBox()
-{
-    const input = getChatMessageInput();
-    if (!(input instanceof HTMLElement))
-    {
-        announceAssertive("Chat message box is not available.");
-        return false;
-    }
-
-    const focusInput = () => input.focus({ preventScroll: false });
-    focusInput();
-    requestAnimationFrame(focusInput);
-    setTimeout(focusInput, 0);
-    setTimeout(focusInput, 50);
-    announcePolite("Chat message box focused.");
-    return true;
-}
-
 function shouldMoveInitialFocus(element)
 {
     if (!(element instanceof HTMLElement)) return true;
