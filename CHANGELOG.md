@@ -1,4 +1,4 @@
-### v0.12.0
+### v0.14.0
 
 - Changed module shortcut defaults to avoid Chrome and Foundry conflicts: sheet-tab focus is now `Alt+Shift+H`, "Where am I" is `Alt+Shift+W`, and character-sheet access uses `C` with a module fallback when Foundry cannot resolve the actor.
 - Added a targeted client keybinding migration for known older defaults while preserving custom remaps.

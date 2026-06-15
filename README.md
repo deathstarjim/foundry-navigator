@@ -1,102 +1,108 @@
 # Foundry Navigator
 
-Foundry Navigator adds keyboard-first and screen-reader-friendly improvements to Foundry VTT, with the current implementation focused on **D&D 5e on Foundry VTT v13**.
+Foundry Navigator adds keyboard-first and screen-reader-friendly navigation tools to Foundry Virtual Tabletop. It is currently focused on **D&D 5e character sheets and gameplay workflows on Foundry VTT v13 and v14**.
+
+The module is designed to reduce reliance on mouse-only controls, hover interactions, and visually locating controls during character-sheet navigation and combat.
 
 ## Current Scope
 
-The most complete and actively developed support is for:
-
-- Foundry VTT v13
+- Foundry VTT v13 and v14
 - D&D 5e system
-- Tidy 5e Sheets and the default D&D 5e actor sheets
+- Default D&D 5e actor sheets
+- Tidy 5e Sheets, including the modern layout
 
-## What It Does
+## What's New in v0.14.0
+
+- Safer default shortcuts that avoid known Chrome and Foundry conflicts
+- Automatic migration of older module defaults without overwriting custom keybindings
+- A more reliable `C` shortcut for opening the current character sheet when Foundry cannot resolve it normally
+- Screen reader narration throughout target selection, attack confirmation, damage application, and focus recovery
+- Optional announcements for damage, healing, temporary HP, conditions, and status-effect changes
+- Dedicated `Enter` and `Shift+Enter` canvas token actions
+
+## Feature Overview
 
 ### Character Sheet Keyboard Navigation
 
-Foundry Navigator adds keyboard support to D&D 5e character sheets, including:
+- `Alt+Shift+H` returns focus to the active sheet tab, including when focus is inside a sheet input
+- `Tab` and `Shift+Tab` move between supported tab controls
+- `Enter` activates tabs and common sheet actions
+- Keyboard users can move into the active panel and cycle through interactive controls predictably
+- `Escape` and `Ctrl+Shift+Tab` provide a clean way to leave sheet focus modes
+- Spoken guidance plays when focus first enters a supported character sheet
 
-- returning focus to the active sheet tab with `Alt+Shift+H`
-- moving between tab controls with `Tab` / `Shift+Tab`
-- activating tabs with `Enter`
-- moving into the active panel and cycling through interactive controls
-- leaving sheet focus cleanly with `Escape` or `Ctrl+Shift+Tab`
-- spoken guidance when keyboard focus first enters a supported character sheet
+### Inventory, Spell, and Action Support
 
-Supported sheet implementations currently include:
+- Keyboard support for inventory rows, spell rows, and feature rows
+- Support for attack, use, and roll buttons on supported sheets
+- Keyboard access to Tidy 5e item context menus
+- Support for Tidy 5e's combined Sheet tab as well as dedicated Inventory and Spellbook layouts
+- Improved handling for attack, damage, healing, and roll configuration dialogs
+- Row-centric activation logic improves reliability when focus lands on nested controls such as item images
+- Focus is restored to the originating row after many attack and consumable workflows complete
 
-- default D&D 5e actor sheets
-- Tidy 5e Sheets, including the modern layout
+### Combat Tunnel and Targeting
 
-### Inventory, Spell, and Action Flows
-
-The module improves keyboard access to common row actions on supported D&D 5e sheets:
-
-- inventory row actions
-- spell row actions
-- attack and use/roll buttons
-- item context menus on Tidy 5e sheets
-- roll configuration dialogs
-
-It also restores focus back to the originating row after many attack and consumable flows complete, which makes repeated keyboard use much less frustrating.
-
-### Keyboard-First Target Selection and Combat Follow-Up
-
-For D&D 5e attack and consumable flows, the module adds accessible target selection and follow-up handling:
-
-- keyboard target selection instead of relying on mouse-only targeting
-- distance-aware target ordering
-- self-first consumable targeting when appropriate
-- hit/miss follow-up dialogs
-- direct damage and healing application flows
-- GM-mediated damage/healing application for players acting on unowned enemy tokens
-
-This is meant to reduce or remove the need to chase chat cards and hover-only controls during combat.
+- Keyboard-first target selection dialogs for D&D 5e attack and consumable flows
+- Distance-aware target ordering
+- Self-first consumable targeting when appropriate
+- Hit or miss follow-up dialogs after attack rolls
+- Direct damage and healing application without chasing chat card controls
+- GM-mediated damage and healing application for players acting on unowned hostile tokens
+- Screen reader narration from target selection through attack confirmation, damage application, and focus recovery
 
 ### Screen Reader Announcements
 
-The module includes screen reader live-region announcements for several Foundry events and gameplay states, including:
+Announcement features are configurable per player, so each user can enable the feedback that is useful to them.
 
-- chat messages
-- roll results
-- combat turn changes
+- Incoming chat messages
+- Roll results, with a shortcut to re-read the latest result
+- Combat turn changes
 - UI notifications
-- token movement
-- tokens entering or leaving the current scene
-- HP / damage changes on owned actors
-- status effects and condition changes on owned actors
+- Token movement
+- Tokens entering or leaving the current scene
+- HP, damage, healing, and temporary HP changes on owned actors
+- Condition and status effect changes on owned actors
+- Improved labels and spoken hints in Foundry Navigator's Configure Settings controls
 
-There is also an `Alt+Shift+R` shortcut to re-read the most recent roll result.
+### Canvas Keyboard Actions
+
+- `Enter` opens the actor sheet for the current keyboard token
+- `Shift+Enter` targets the current keyboard token
+- `Alt+Shift+W` announces the controlled token's grid position, HP, and active conditions
+- `C` opens the controlled token's actor sheet or the current player's assigned character sheet
 
 ### Helpful Keyboard Shortcuts
 
-Current shortcuts include:
-
 - `Alt+Shift+H`: return focus to the active sheet tab
-- `Alt+Shift+R`: read the latest roll result
-- `C`: open your current character sheet, including a fallback when Foundry's core shortcut cannot resolve it
+- `Alt+Shift+R`: re-read the latest roll result
+- `C`: open your current character sheet, with a module fallback when Foundry cannot resolve it
 - `Alt+Shift+A`: open Foundry Navigator settings
 - `Alt+Shift+K`: open Configure Controls
-- `Alt+Shift+W`: announce the controlled token's current position, HP, and conditions
-- `Enter` / `Shift+Enter`: keyboard token interactions on the canvas
+- `Alt+Shift+W`: announce the controlled token's position, HP, and conditions
+- `Enter`: open the current keyboard token's actor sheet
+- `Shift+Enter`: target the current keyboard token
 
-Many of these can be changed through Foundry's normal controls configuration.
+Module shortcuts can be changed through Foundry's Configure Controls screen. Known older defaults are migrated automatically, while user-created remappings are preserved.
 
 ## Installation
 
-Install using the `module.json` manifest from the latest GitHub release.
+Install the module using the manifest URL from the latest GitHub release:
+
+`https://github.com/deathstarjim/foundry-navigator/releases/latest/download/module.json`
 
 If you are testing development builds manually, make sure the manifest and download URLs match real public release artifacts and that the release zip contains `module.json` at the root.
 
 ## Limitations
 
-- Current navigation and screen-reader support is strongest on D&D 5e.
-- Tidy 5e and default D&D 5e sheets are actively supported; other sheet systems are not guaranteed.
-- This is still an ongoing effort; there are almost certainly workflows that need refinement.
+- The most complete support is currently for D&D 5e on Foundry v13 and v14.
+- Default D&D 5e sheets and Tidy 5e are the primary supported sheet types.
+- Other systems and sheet implementations may work partially, but are not the focus of current development.
+- Accessibility support is still evolving, and some Foundry or third-party module workflows may require further refinement.
 
 ## Acknowledgments
 
-This project was inspired in part by earlier Foundry accessibility work from Cora (silvative), including the Accessibility Enhancements module. Foundry Navigator is maintained as its own D&D 5e-focused module.
+Foundry Navigator was inspired in part by earlier Foundry accessibility work from Cora (silvative), including the Accessibility Enhancements module. Direct feedback from screen-reader and keyboard-only players continues to guide development.
 
 ## Bugs and Enhancements
 
@@ -114,6 +120,4 @@ When suggesting an enhancement, please describe the table workflow problem you a
 
 ## Contributing
 
-Code contributions are very welcome.
-
-I do not personally use a screen reader, so direct feedback from players who do is especially valuable. Real testing feedback is often more useful than theoretical accessibility guesses.
+Code contributions and real table feedback are welcome, especially feedback from players using keyboard-only or screen-reader-driven workflows.
