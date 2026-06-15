@@ -22,8 +22,8 @@ export function registerSheetTabBootstrap({
     {
         game.keybindings.register(FN_MODULE_ID, "focusCharacterSheetTabs", {
             name: "Focus Character Sheet Tabs",
-            hint: "Moves focus back to the active tab button on the current character sheet. Default: Alt+T. You can change this in Configure Controls.",
-            editable: [{ key: "KeyT", modifiers: ["Alt"] }],
+            hint: "Moves focus back to the active tab button on the current character sheet. Default: Alt+Shift+H. You can change this in Configure Controls.",
+            editable: [{ key: "KeyH", modifiers: ["Alt", "Shift"] }],
             onDown: () =>
             {
                 focusActiveActorSheetTabFromHotkey(false);

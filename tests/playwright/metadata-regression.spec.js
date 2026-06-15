@@ -26,7 +26,10 @@ test("manifest, package metadata, and release URLs stay synchronized", () =>
     expect(packageLock.packages[""].version).toBe(manifest.version);
     expect(manifest.download).toContain(`/releases/download/${manifest.version}/module.zip`);
 
-    for (const scriptPath of [...manifest.scripts, ...manifest.esmodules, ...manifest.styles])
+    const manifestPaths = [...manifest.scripts, ...manifest.esmodules, ...manifest.styles]
+        .map(entry => typeof entry === "string" ? entry : entry.src);
+
+    for (const scriptPath of manifestPaths)
     {
         expect(fs.existsSync(path.join(repoRoot, scriptPath)), `${scriptPath} should exist`).toBe(true);
     }
@@ -60,13 +63,32 @@ test("extracted sheettabs modules expose the expected integration points", () =>
     expect(globalKeyboardRouting).toContain("window.addEventListener(\"keydown\"");
     expect(globalKeyboardRouting).toContain("global Tab redirected into sheet");
 });
-test("screen reader shortcuts use shifted Alt defaults for roll readout and character sheet", () =>
+test("module shortcuts avoid browser and Foundry core conflicts", () =>
+{
+    const screenreader = fs.readFileSync(path.join(repoRoot, "scripts", "screenreader.js"), "utf8");
+    const sheettabs = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs.js"), "utf8");
+    const bootstrap = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs", "bootstrap.js"), "utf8");
+
+    expect(screenreader).toContain("editable: [{ key: 'KeyR', modifiers: ['Alt', 'Shift'] }]");
+    expect(screenreader).toContain("editable: [{ key: 'KeyW', modifiers: ['Alt', 'Shift'] }]");
+    expect(screenreader).toContain("editable: [{ key: 'KeyC' }]");
+    expect(screenreader).toContain("precedence: CONST.KEYBINDING_PRECEDENCE.PRIORITY");
+    expect(bootstrap).toContain('editable: [{ key: "KeyH", modifiers: ["Alt", "Shift"] }]');
+    expect(sheettabs).toContain('event.shiftKey');
+    expect(sheettabs).toContain('event.key.toLowerCase() === "h"');
+    expect(screenreader).not.toContain("editable: [{ key: 'KeyR', modifiers: ['Alt'] }]");
+    expect(bootstrap).not.toContain('editable: [{ key: "KeyT", modifiers: ["Alt"] }]');
+    expect(sheettabs).not.toContain('event.key.toLowerCase() === "t"');
+    expect(screenreader).not.toContain("focusChatMessageBox");
+});
+
+test("known legacy defaults are migrated without replacing arbitrary custom bindings", () =>
 {
     const screenreader = fs.readFileSync(path.join(repoRoot, "scripts", "screenreader.js"), "utf8");
 
-    expect(screenreader).toContain("editable: [{ key: 'KeyR', modifiers: ['Alt', 'Shift'] }]");
-    expect(screenreader).toContain("editable: [{ key: 'KeyC', modifiers: ['Alt', 'Shift'] }]");
-    expect(screenreader).not.toContain("editable: [{ key: 'KeyR', modifiers: ['Alt'] }]");
-    expect(screenreader).not.toContain("editable: [{ key: 'KeyC', modifiers: ['Alt'] }]");
-    expect(screenreader).not.toContain("focusChatMessageBox");
+    expect(screenreader).toContain("async function migrateLegacyDefaultKeybindings()");
+    expect(screenreader).toContain('action: "foundry-navigator.whereAmI"');
+    expect(screenreader).toContain('action: "foundry-navigator.focusCharacterSheetTabs"');
+    expect(screenreader).toContain('action: "foundry-navigator.openMyCharacterSheet"');
+    expect(screenreader).toContain("legacy.some(binding => keybindingListsMatch(current, binding))");
 });

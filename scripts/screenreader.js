@@ -99,7 +99,7 @@ Hooks.on("init", () =>
     game.keybindings.register('foundry-navigator', 'whereAmI', {
         name: 'Where Am I - Read Position & Status',
         hint: "Announces the controlled token's grid position, HP, and active conditions via the screen reader.",
-        editable: [{ key: 'KeyW' }],
+        editable: [{ key: 'KeyW', modifiers: ['Alt', 'Shift'] }],
         onDown: () =>
         {
             const token = canvas?.tokens?.controlled?.[0];
@@ -169,8 +169,9 @@ Hooks.on("init", () =>
 
     game.keybindings.register('foundry-navigator', 'openMyCharacterSheet', {
         name: 'Open My Character Sheet',
-        hint: 'Opens your current character sheet using your controlled token first, then your assigned character. Default: Alt+Shift+C. You can change this in Configure Controls.',
-        editable: [{ key: 'KeyC', modifiers: ['Alt', 'Shift'] }],
+        hint: "Opens your current character sheet using your controlled token first, then your assigned character. Default: C. This also provides a fallback when Foundry's core C shortcut cannot resolve a character. You can change this in Configure Controls.",
+        editable: [{ key: 'KeyC' }],
+        precedence: CONST.KEYBINDING_PRECEDENCE.PRIORITY,
         onDown: () =>
         {
             void openPreferredCharacterSheet();
@@ -185,6 +186,10 @@ Hooks.on("init", () =>
 
 Hooks.on("ready", () =>
 {
+    void migrateLegacyDefaultKeybindings().catch(error =>
+    {
+        console.warn("Foundry Navigator could not migrate legacy keybinding defaults.", error);
+    });
     focusCanvasAfterReady();
 
     const handleKeybindingsControlsKeyEvent = (event) =>
@@ -270,6 +275,66 @@ Hooks.on("ready", () =>
     document.addEventListener("keydown", handleKeybindingsControlsKeyEvent, true);
     document.addEventListener("keyup", handleKeybindingsControlsKeyEvent, true);
 });
+
+async function migrateLegacyDefaultKeybindings()
+{
+    const replacements = [
+        {
+            action: "foundry-navigator.whereAmI",
+            legacy: [[{ key: "KeyW", modifiers: [] }]],
+            replacement: [{ key: "KeyW", modifiers: ["Alt", "Shift"] }],
+        },
+        {
+            action: "foundry-navigator.readLastRollResult",
+            legacy: [[{ key: "KeyR", modifiers: ["Alt"] }]],
+            replacement: [{ key: "KeyR", modifiers: ["Alt", "Shift"] }],
+        },
+        {
+            action: "foundry-navigator.focusCharacterSheetTabs",
+            legacy: [[{ key: "KeyT", modifiers: ["Alt"] }]],
+            replacement: [{ key: "KeyH", modifiers: ["Alt", "Shift"] }],
+        },
+        {
+            action: "foundry-navigator.openMyCharacterSheet",
+            legacy: [
+                [{ key: "KeyC", modifiers: ["Alt"] }],
+                [{ key: "KeyC", modifiers: ["Alt", "Shift"] }],
+            ],
+            replacement: [{ key: "KeyC", modifiers: [] }],
+        },
+    ];
+
+    const storedBindings = foundry.utils.deepClone(game.settings.get("core", "keybindings"));
+    let changed = false;
+
+    for (const { action, legacy, replacement } of replacements)
+    {
+        const current = storedBindings[action];
+        if (!legacy.some(binding => keybindingListsMatch(current, binding))) continue;
+        storedBindings[action] = replacement;
+        changed = true;
+    }
+
+    if (!changed) return;
+
+    await game.settings.set("core", "keybindings", storedBindings);
+    game.keybindings.initialize();
+}
+
+function keybindingListsMatch(left, right)
+{
+    if (!Array.isArray(left) || left.length !== right.length) return false;
+
+    return left.every((binding, index) =>
+    {
+        const expected = right[index];
+        const modifiers = [...(binding?.modifiers ?? [])].sort();
+        const expectedModifiers = [...(expected?.modifiers ?? [])].sort();
+        return binding?.key === expected?.key
+            && modifiers.length === expectedModifiers.length
+            && modifiers.every((modifier, modifierIndex) => modifier === expectedModifiers[modifierIndex]);
+    });
+}
 
 Hooks.on("renderSettingsConfig", () =>
 {

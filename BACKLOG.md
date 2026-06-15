@@ -29,7 +29,7 @@ All features should be `scope: 'client'` (per-player opt-in) unless noted.
 ## Keyboard and No-Mouse Navigation
 *Reducing the need for click-and-drag is the highest-value area for blind and low-vision players.*
 
-- [x] **"Where am I" hotkey** - configurable keybind (default: `W`) that re-reads the controlled token's position, HP, and any active conditions via the assertive live region. Works on demand without any interaction.
+- [x] **"Where am I" hotkey** - configurable keybind (default: `Alt+Shift+W`) that re-reads the controlled token's position, HP, and any active conditions via the assertive live region. Works on demand without any interaction.
 - [x] **Initial token selection / open sheet flow** - provide a keyboard-first way on initial world load to find owned tokens, select or control one, and open its character sheet without needing a mouse or pre-existing canvas focus.
 - [ ] **Tab through nearby tokens** - `Tab` / `Shift+Tab` cycles through tokens on the canvas; `Enter` selects or controls, `Shift+Enter` targets. Still useful outside sheet-driven combat flows for scene exploration, selecting allies, and interacting with placed tokens.
 - [ ] **Nearby token scan** - keybind announces tokens within a configurable radius of the controlled token, including distance, grid coordinate, and disposition filter (friendly, neutral, secret, hostile, or all). Useful for situational awareness even when combat targeting is handled from the sheet.

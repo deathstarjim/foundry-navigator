@@ -1,5 +1,7 @@
 ### v0.12.0
 
+- Changed module shortcut defaults to avoid Chrome and Foundry conflicts: sheet-tab focus is now `Alt+Shift+H`, "Where am I" is `Alt+Shift+W`, and character-sheet access uses `C` with a module fallback when Foundry cannot resolve the actor.
+- Added a targeted client keybinding migration for known older defaults while preserving custom remaps.
 - Removed older feature modules for add-item helpers, audio cues, alternate sheet styling, and compendium image previews so the module is focused on the current D&D 5e keyboard and screen-reader workflow.
 - Replaced the old no-right-click script with a dedicated canvas keyboard interaction script for `Enter` and `Shift+Enter` token actions.
 - Updated README, package metadata, and license metadata to describe Foundry Navigator as its own D&D 5e-focused module.

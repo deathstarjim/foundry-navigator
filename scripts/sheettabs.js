@@ -435,7 +435,14 @@ function attachSheetTabHandlers(root, app)
         const activeElement = document.activeElement;
         const adapter = getSheetAdapter(app, root);
 
-        if (adapter.localTabReturnHotkey && event.altKey && !event.ctrlKey && !event.metaKey && event.key.toLowerCase() === "t")
+        if (
+            adapter.localTabReturnHotkey
+            && event.altKey
+            && event.shiftKey
+            && !event.ctrlKey
+            && !event.metaKey
+            && event.key.toLowerCase() === "h"
+        )
         {
             event.preventDefault();
             event.stopPropagation();

@@ -193,6 +193,28 @@ async function setCharacterSheetClass(page, actorName, sheetClass)
 
 async function focusShouldReturnToTab(page, sheet, tabName)
 {
+    const keybindingDiagnostics = await page.evaluate(() =>
+    {
+        const action = "foundry-navigator.focusCharacterSheetTabs";
+        return {
+            configured: game.keybindings.get("foundry-navigator", "focusCharacterSheetTabs"),
+            stored: game.settings.get("core", "keybindings")[action] ?? null,
+            keyHActions: (game.keybindings.activeKeys.get("KeyH") ?? []).map(binding => ({
+                action: binding.action,
+                requiredModifiers: binding.requiredModifiers,
+                optionalModifiers: binding.optionalModifiers,
+                precedence: binding.precedence,
+            })),
+        };
+    });
+    expect(keybindingDiagnostics.configured).toEqual([
+        { key: "KeyH", modifiers: ["Alt", "Shift"] },
+    ]);
+    expect(keybindingDiagnostics.keyHActions).toContainEqual(expect.objectContaining({
+        action: "foundry-navigator.focusCharacterSheetTabs",
+        requiredModifiers: ["Alt", "Shift"],
+    }));
+
     const tab = sheet.getByRole("tab", { name: new RegExp(tabName, "i") });
     await expect(tab).toBeVisible();
     await tab.click();
@@ -200,7 +222,7 @@ async function focusShouldReturnToTab(page, sheet, tabName)
     await tab.press("Enter");
     await expect(tab).not.toBeFocused();
 
-    await page.keyboard.press("Alt+T");
+    await page.keyboard.press("Alt+Shift+H");
     await expect(tab).toBeFocused();
 }
 
@@ -266,7 +288,7 @@ async function chooseNormalRoll(page)
     await normalButton.click();
 }
 
-test("Alt+T returns focus to the active tab well on the current character sheet", async ({ page }) =>
+test("Alt+Shift+H returns focus to the active tab well on the current character sheet", async ({ page }) =>
 {
     await joinAsTester(page);
     await logUserCharacterDiagnostics(page, TEST_ACTOR_NAME);
@@ -277,7 +299,7 @@ test("Alt+T returns focus to the active tab well on the current character sheet"
     await focusShouldReturnToTab(page, sheet, "Features");
 });
 
-test("Alt+T still works after changing the actor between Tidy and default sheets", async ({ page }) =>
+test("Alt+Shift+H still works after changing the actor between Tidy and default sheets", async ({ page }) =>
 {
     await joinAsTester(page);
 

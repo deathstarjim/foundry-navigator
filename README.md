@@ -16,7 +16,7 @@ The most complete and actively developed support is for:
 
 Foundry Navigator adds keyboard support to D&D 5e character sheets, including:
 
-- returning focus to the active sheet tab with `Alt+T`
+- returning focus to the active sheet tab with `Alt+Shift+H`
 - moving between tab controls with `Tab` / `Shift+Tab`
 - activating tabs with `Enter`
 - moving into the active panel and cycling through interactive controls
@@ -72,12 +72,12 @@ There is also an `Alt+Shift+R` shortcut to re-read the most recent roll result.
 
 Current shortcuts include:
 
-- `Alt+T`: return focus to the active sheet tab
+- `Alt+Shift+H`: return focus to the active sheet tab
 - `Alt+Shift+R`: read the latest roll result
-- `Alt+Shift+C`: open your current character sheet
+- `C`: open your current character sheet, including a fallback when Foundry's core shortcut cannot resolve it
 - `Alt+Shift+A`: open Foundry Navigator settings
 - `Alt+Shift+K`: open Configure Controls
-- `W`: announce the controlled token's current position, HP, and conditions
+- `Alt+Shift+W`: announce the controlled token's current position, HP, and conditions
 - `Enter` / `Shift+Enter`: keyboard token interactions on the canvas
 
 Many of these can be changed through Foundry's normal controls configuration.
