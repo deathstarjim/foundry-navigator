@@ -78,7 +78,7 @@ Hooks.on("init", () =>
 
     game.settings.register('foundry-navigator', 'announceHpChanges', {
         name: 'Announce HP / Damage Changes',
-        hint: 'Screen reader announces damage, healing, and temporary HP changes for owned actors.',
+        hint: 'Screen reader announces detailed HP changes for owned actors and damage or healing for currently targeted visible tokens without revealing their HP totals.',
         scope: 'client',
         config: true,
         type: Boolean,
@@ -613,11 +613,15 @@ function formatCurrentHp(actor)
     return parts.join(". ");
 }
 
-function getHpChangeAnnouncement(actor, previousHp, currentHp)
+function getHpChangeAnnouncement(actor, previousHp, currentHp, options = {})
 {
     if (!previousHp || !currentHp) return null;
 
-    const name = actor?.name ?? "Actor";
+    const {
+        name = actor?.name ?? "Actor",
+        includeCurrentTotal = true,
+        includeTemporaryHp = true,
+    } = options;
     const hpSummary = formatCurrentHp(actor);
     const announcements = [];
 
@@ -631,19 +635,62 @@ function getHpChangeAnnouncement(actor, previousHp, currentHp)
     }
 
     const tempDelta = currentHp.temp - previousHp.temp;
-    if (tempDelta < 0)
+    if (includeTemporaryHp && tempDelta < 0)
     {
         announcements.push(`${name} loses ${Math.abs(tempDelta)} temporary hit points.`);
-    } else if (tempDelta > 0)
+    } else if (includeTemporaryHp && tempDelta > 0)
     {
         announcements.push(`${name} gains ${tempDelta} temporary hit points.`);
     }
 
     if (!announcements.length) return null;
-    if (hpSummary) announcements.push(`${hpSummary}.`);
+    if (includeCurrentTotal && hpSummary) announcements.push(`${hpSummary}.`);
 
     return announcements.join(" ");
 }
+
+function getTargetedTokenForActor(actor, targets = game.user?.targets, user = game.user)
+{
+    if (!actor || !targets) return null;
+
+    for (const token of targets)
+    {
+        if (!token) continue;
+        if (token.document?.hidden && !user?.isGM) continue;
+
+        const sameActor = token.actor === actor;
+        const sameSyntheticToken = actor.token?.id && token.document?.id === actor.token.id;
+        if (sameActor || sameSyntheticToken) return token;
+    }
+
+    return null;
+}
+
+function getHpAnnouncementContext(actor, targets = game.user?.targets, user = game.user)
+{
+    if (isOwnedActor(actor))
+    {
+        return {
+            name: actor?.name ?? "Actor",
+            includeCurrentTotal: true,
+            includeTemporaryHp: true,
+        };
+    }
+
+    const target = getTargetedTokenForActor(actor, targets, user);
+    if (!target) return null;
+
+    return {
+        name: target.name ?? target.document?.name ?? actor?.name ?? "Target",
+        includeCurrentTotal: false,
+        includeTemporaryHp: false,
+    };
+}
+
+globalThis.FoundryNavigatorHp = {
+    getHpAnnouncementContext,
+    getHpChangeAnnouncement,
+};
 
 function getConditionLabel(document)
 {
@@ -1303,25 +1350,28 @@ Hooks.on("renderChatMessageHTML", (message, html) =>
 Hooks.on("preUpdateActor", (actor, changes) =>
 {
     if (!game.settings.get('foundry-navigator', 'announceHpChanges')) return;
-    if (!isOwnedActor(actor)) return;
     if (!hasHpChange(changes)) return;
+
+    const context = getHpAnnouncementContext(actor);
+    if (!context) return;
 
     const hp = getHpData(actor);
     if (!hp) return;
-    FN_PREUPDATE_HP.set(actor.id, hp);
+    FN_PREUPDATE_HP.set(actor.uuid ?? actor.id, { hp, context });
 });
 
 Hooks.on("updateActor", (actor, changes) =>
 {
     if (!game.settings.get('foundry-navigator', 'announceHpChanges')) return;
-    if (!isOwnedActor(actor)) return;
     if (!hasHpChange(changes)) return;
 
-    const previousHp = FN_PREUPDATE_HP.get(actor.id);
-    FN_PREUPDATE_HP.delete(actor.id);
+    const cacheKey = actor.uuid ?? actor.id;
+    const previous = FN_PREUPDATE_HP.get(cacheKey);
+    FN_PREUPDATE_HP.delete(cacheKey);
+    if (!previous) return;
 
     const currentHp = getHpData(actor);
-    const announcement = getHpChangeAnnouncement(actor, previousHp, currentHp);
+    const announcement = getHpChangeAnnouncement(actor, previous.hp, currentHp, previous.context);
     if (announcement) announcePolite(announcement);
 });
 

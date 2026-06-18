@@ -68,12 +68,15 @@ test("module shortcuts avoid browser and Foundry core conflicts", () =>
     const screenreader = fs.readFileSync(path.join(repoRoot, "scripts", "screenreader.js"), "utf8");
     const sheettabs = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs.js"), "utf8");
     const bootstrap = fs.readFileSync(path.join(repoRoot, "scripts", "sheettabs", "bootstrap.js"), "utf8");
+    const canvasKeyboard = fs.readFileSync(path.join(repoRoot, "scripts", "canvas-keyboard.js"), "utf8");
 
     expect(screenreader).toContain("editable: [{ key: 'KeyR', modifiers: ['Alt', 'Shift'] }]");
     expect(screenreader).toContain("editable: [{ key: 'KeyW', modifiers: ['Alt', 'Shift'] }]");
     expect(screenreader).toContain("editable: [{ key: 'KeyC' }]");
     expect(screenreader).toContain("precedence: CONST.KEYBINDING_PRECEDENCE.PRIORITY");
     expect(bootstrap).toContain('editable: [{ key: "KeyH", modifiers: ["Alt", "Shift"] }]');
+    expect(canvasKeyboard).toContain('editable: [{ key: "KeyT", modifiers: ["Alt", "Shift"] }]');
+    expect(canvasKeyboard).toContain('"toggleKeyboardTokenTarget"');
     expect(sheettabs).toContain('event.shiftKey');
     expect(sheettabs).toContain('event.key.toLowerCase() === "h"');
     expect(screenreader).not.toContain("editable: [{ key: 'KeyR', modifiers: ['Alt'] }]");

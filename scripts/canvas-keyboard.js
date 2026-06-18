@@ -88,8 +88,36 @@ function toggleTokenTarget(token)
         user: game.user,
         groupSelection: false
     });
-    return true;
+    return nextState;
 }
+
+function announceTargetChange(token, targeted)
+{
+    const action = targeted ? "targeted" : "no longer targeted";
+    globalThis.FoundryNavigatorAnnounce?.polite?.(`${token.name ?? "Token"} ${action}.`);
+}
+
+Hooks.once("init", () =>
+{
+    game.keybindings.register("foundry-navigator", "toggleKeyboardTokenTarget", {
+        name: "Target Hovered Token",
+        hint: "Targets or untargets the hovered token. Falls back to a single controlled token. This is an alternate to Foundry's T shortcut for screen-reader users.",
+        editable: [{ key: "KeyT", modifiers: ["Alt", "Shift"] }],
+        onDown: () =>
+        {
+            const token = getKeyboardToken();
+            if (!token)
+            {
+                globalThis.FoundryNavigatorAnnounce?.polite?.("No keyboard token available.");
+                return true;
+            }
+
+            const targeted = toggleTokenTarget(token);
+            announceTargetChange(token, targeted);
+            return true;
+        },
+    });
+});
 
 window.addEventListener("keydown", event =>
 {
@@ -106,7 +134,8 @@ window.addEventListener("keydown", event =>
 
     if (event.shiftKey)
     {
-        toggleTokenTarget(token);
+        const targeted = toggleTokenTarget(token);
+        announceTargetChange(token, targeted);
         return;
     }
 

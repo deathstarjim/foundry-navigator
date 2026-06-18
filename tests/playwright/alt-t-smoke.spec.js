@@ -89,6 +89,109 @@ async function joinAsTester(page)
     throw new Error("Foundry join page did not become available. Is the world active?");
 }
 
+test("HP announcements protect unowned target totals", async ({ page }) =>
+{
+    await joinAsTester(page);
+
+    const result = await page.evaluate(() =>
+    {
+        const helpers = globalThis.FoundryNavigatorHp;
+        if (!helpers) return null;
+
+        const ownedActor = {
+            isOwner: true,
+            name: "Hero",
+            system: { attributes: { hp: { value: 12, max: 20, temp: 3 } } },
+        };
+        const targetActor = {
+            isOwner: false,
+            name: "Goblin",
+            system: { attributes: { hp: { value: 7, max: 15, temp: 2 } } },
+        };
+        const visibleTarget = {
+            actor: targetActor,
+            name: "Goblin Scout",
+            document: { id: "visible", hidden: false },
+        };
+        const hiddenTarget = {
+            actor: targetActor,
+            name: "Hidden Goblin",
+            document: { id: "hidden", hidden: true },
+        };
+        const player = { isGM: false };
+        const previousHp = { value: 15, max: 20, temp: 0 };
+        const currentHp = { value: 12, max: 20, temp: 3 };
+        const targetPreviousHp = { value: 12, max: 15, temp: 0 };
+        const targetCurrentHp = { value: 7, max: 15, temp: 2 };
+        const ownedContext = helpers.getHpAnnouncementContext(ownedActor, [], player);
+        const targetContext = helpers.getHpAnnouncementContext(targetActor, [visibleTarget], player);
+
+        return {
+            ownedContext,
+            targetContext,
+            hiddenContext: helpers.getHpAnnouncementContext(targetActor, [hiddenTarget], player),
+            untargetedContext: helpers.getHpAnnouncementContext(targetActor, [], player),
+            ownedAnnouncement: helpers.getHpChangeAnnouncement(
+                ownedActor,
+                previousHp,
+                currentHp,
+                ownedContext
+            ),
+            targetAnnouncement: helpers.getHpChangeAnnouncement(
+                targetActor,
+                targetPreviousHp,
+                targetCurrentHp,
+                targetContext
+            ),
+        };
+    });
+
+    expect(result).not.toBeNull();
+    expect(result.ownedContext).toEqual({
+        name: "Hero",
+        includeCurrentTotal: true,
+        includeTemporaryHp: true,
+    });
+    expect(result.targetContext).toEqual({
+        name: "Goblin Scout",
+        includeCurrentTotal: false,
+        includeTemporaryHp: false,
+    });
+    expect(result.hiddenContext).toBeNull();
+    expect(result.untargetedContext).toBeNull();
+    expect(result.ownedAnnouncement).toBe(
+        "Hero takes 3 damage. Hero gains 3 temporary hit points. HP 12 of 20. 3 temporary HP."
+    );
+    expect(result.targetAnnouncement).toBe("Goblin Scout takes 5 damage.");
+});
+
+test("Alt+Shift+T registers as an alternate target binding", async ({ page }) =>
+{
+    await joinAsTester(page);
+
+    const binding = await page.evaluate(() =>
+    {
+        const action = "foundry-navigator.toggleKeyboardTokenTarget";
+        return {
+            configured: game.keybindings.get("foundry-navigator", "toggleKeyboardTokenTarget"),
+            active: (game.keybindings.activeKeys.get("KeyT") ?? [])
+                .filter(candidate => candidate.action === action)
+                .map(candidate => ({
+                    action: candidate.action,
+                    requiredModifiers: candidate.requiredModifiers,
+                })),
+        };
+    });
+
+    expect(binding.configured).toEqual([
+        { key: "KeyT", modifiers: ["Alt", "Shift"] },
+    ]);
+    expect(binding.active).toContainEqual({
+        action: "foundry-navigator.toggleKeyboardTokenTarget",
+        requiredModifiers: ["Alt", "Shift"],
+    });
+});
+
 async function logUserCharacterDiagnostics(page, actorName = "Tester the Brave")
 {
     const diagnostics = await page.evaluate((name) =>

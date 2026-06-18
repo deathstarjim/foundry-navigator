@@ -11,14 +11,11 @@ The module is designed to reduce reliance on mouse-only controls, hover interact
 - Default D&D 5e actor sheets
 - Tidy 5e Sheets, including the modern layout
 
-## What's New in v0.14.0
+## What's New in v0.15.0
 
-- Safer default shortcuts that avoid known Chrome and Foundry conflicts
-- Automatic migration of older module defaults without overwriting custom keybindings
-- A more reliable `C` shortcut for opening the current character sheet when Foundry cannot resolve it normally
-- Screen reader narration throughout target selection, attack confirmation, damage application, and focus recovery
-- Optional announcements for damage, healing, temporary HP, conditions, and status-effect changes
-- Dedicated `Enter` and `Shift+Enter` canvas token actions
+- HP and damage announcements now include currently targeted visible tokens without exposing exact totals or temporary HP for unowned actors
+- `Alt+Shift+T` provides a screen-reader-friendly alternate shortcut for targeting the hovered token
+- Foundry's native `T` target shortcut remains unchanged for other players
 
 ## Feature Overview
 
@@ -61,7 +58,7 @@ Announcement features are configurable per player, so each user can enable the f
 - UI notifications
 - Token movement
 - Tokens entering or leaving the current scene
-- HP, damage, healing, and temporary HP changes on owned actors
+- Detailed HP, damage, healing, and temporary HP changes on owned actors, plus damage and healing for currently targeted visible tokens without exposing hidden totals
 - Condition and status effect changes on owned actors
 - Improved labels and spoken hints in Foundry Navigator's Configure Settings controls
 
@@ -69,6 +66,7 @@ Announcement features are configurable per player, so each user can enable the f
 
 - `Enter` opens the actor sheet for the current keyboard token
 - `Shift+Enter` targets the current keyboard token
+- `Alt+Shift+T` targets the hovered token as a screen-reader-friendly alternative to Foundry's native `T`
 - `Alt+Shift+W` announces the controlled token's grid position, HP, and active conditions
 - `C` opens the controlled token's actor sheet or the current player's assigned character sheet
 
@@ -82,6 +80,7 @@ Announcement features are configurable per player, so each user can enable the f
 - `Alt+Shift+W`: announce the controlled token's position, HP, and conditions
 - `Enter`: open the current keyboard token's actor sheet
 - `Shift+Enter`: target the current keyboard token
+- `Alt+Shift+T`: target or untarget the hovered token without replacing Foundry's native `T`
 
 Module shortcuts can be changed through Foundry's Configure Controls screen. Known older defaults are migrated automatically, while user-created remappings are preserved.
 

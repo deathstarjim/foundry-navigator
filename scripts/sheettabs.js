@@ -92,7 +92,7 @@ function announceSheetTabsHint(app)
     if (typeof polite !== "function") return;
 
     FN_SHEET_HINTS_ANNOUNCED.add(appId);
-    polite("Character sheet tabs. Tab moves between tabs. Press Enter to open a tab. Alt T returns to tabs. Escape leaves the sheet.");
+    polite("Character sheet tabs. Tab moves between tabs. Press Enter to open a tab. Alt Shift H returns to tabs. Escape leaves the sheet.");
 
     debugSheetTabs("announced sheet tabs hint", {
         appId,

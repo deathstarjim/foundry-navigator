@@ -23,14 +23,11 @@
     <li>Tidy 5e Sheets, including the modern layout</li>
   </ul>
 
-  <h2>What's New in v0.14.0</h2>
+  <h2>What's New in v0.15.0</h2>
   <ul>
-    <li>Safer default shortcuts that avoid known Chrome and Foundry conflicts</li>
-    <li>Automatic migration of older module defaults without overwriting custom keybindings</li>
-    <li>A more reliable <code>C</code> shortcut for opening the current character sheet when Foundry cannot resolve it normally</li>
-    <li>Screen reader narration throughout target selection, attack confirmation, damage application, and focus recovery</li>
-    <li>Optional announcements for damage, healing, temporary HP, conditions, and status-effect changes</li>
-    <li>Dedicated <code>Enter</code> and <code>Shift+Enter</code> canvas token actions</li>
+    <li>HP and damage announcements now include currently targeted visible tokens without exposing exact totals or temporary HP for unowned actors</li>
+    <li><code>Alt+Shift+T</code> provides a screen-reader-friendly alternate shortcut for targeting the hovered token</li>
+    <li>Foundry's native <code>T</code> target shortcut remains unchanged for other players</li>
   </ul>
 
   <h2>Feature Overview</h2>
@@ -78,7 +75,7 @@
     <li>UI notifications</li>
     <li>Token movement</li>
     <li>Tokens entering or leaving the current scene</li>
-    <li>HP, damage, healing, and temporary HP changes on owned actors</li>
+    <li>Detailed HP, damage, healing, and temporary HP changes on owned actors, plus damage and healing for currently targeted visible tokens without exposing hidden totals</li>
     <li>Condition and status effect changes on owned actors</li>
     <li>Improved labels and spoken hints in Foundry Navigator's Configure Settings controls</li>
   </ul>
@@ -87,6 +84,7 @@
   <ul>
     <li><code>Enter</code> opens the actor sheet for the current keyboard token</li>
     <li><code>Shift+Enter</code> targets the current keyboard token</li>
+    <li><code>Alt+Shift+T</code> targets the hovered token as a screen-reader-friendly alternative to Foundry's native <code>T</code></li>
     <li><code>Alt+Shift+W</code> announces the controlled token's grid position, HP, and active conditions</li>
     <li><code>C</code> opens the controlled token's actor sheet or the current player's assigned character sheet</li>
   </ul>
@@ -101,6 +99,7 @@
     <li><code>Alt+Shift+W</code>: announce the controlled token's position, HP, and conditions</li>
     <li><code>Enter</code>: open the current keyboard token's actor sheet</li>
     <li><code>Shift+Enter</code>: target the current keyboard token</li>
+    <li><code>Alt+Shift+T</code>: target or untarget the hovered token without replacing Foundry's native <code>T</code></li>
   </ul>
   <p>
     Module shortcuts can be changed through Foundry's Configure Controls screen. Known older defaults are migrated automatically, while user-created remappings are preserved.

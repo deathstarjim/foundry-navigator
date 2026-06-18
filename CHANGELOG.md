@@ -1,3 +1,8 @@
+### v0.15.0
+
+- Extended HP/damage announcements to currently targeted visible tokens while withholding exact HP totals and temporary HP details for unowned actors.
+- Added `Alt+Shift+T` as a configurable screen-reader-friendly alternative for targeting the hovered token while preserving Foundry's native `T` binding.
+
 ### v0.14.0
 
 - Changed module shortcut defaults to avoid Chrome and Foundry conflicts: sheet-tab focus is now `Alt+Shift+H`, "Where am I" is `Alt+Shift+W`, and character-sheet access uses `C` with a module fallback when Foundry cannot resolve the actor.
