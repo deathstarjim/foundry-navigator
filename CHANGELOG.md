@@ -3,6 +3,8 @@
 - Added structured roll history shortcuts: `Alt+1` reads the most recent roll event, through `Alt+9` for older roll results.
 - Improved roll-result narration by combining matching attack and damage cards into a more useful summary when target and damage details are available.
 - Added `Alt+Shift+P` as a configurable GM pause/unpause shortcut for screen-reader users when Space is intercepted.
+- Changed the default character-sheet shortcut from `C` to `Alt+C` to avoid screen-reader browse-mode conflicts, with migration for known older defaults.
+- Added `Ctrl+S` inside Foundry's Configure Controls dialog to save keybinding changes without mouse navigation.
 
 ### v0.15.0
 

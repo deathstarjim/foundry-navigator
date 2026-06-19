@@ -177,8 +177,8 @@ Hooks.on("init", () =>
 
     game.keybindings.register('foundry-navigator', 'openMyCharacterSheet', {
         name: 'Open My Character Sheet',
-        hint: "Opens your current character sheet using your controlled token first, then your assigned character. Default: C. This also provides a fallback when Foundry's core C shortcut cannot resolve a character. You can change this in Configure Controls.",
-        editable: [{ key: 'KeyC' }],
+        hint: "Opens your current character sheet using your controlled token first, then your assigned character. Default: Alt+C. This also provides a fallback when Foundry's core C shortcut cannot resolve a character. You can change this in Configure Controls.",
+        editable: [{ key: 'KeyC', modifiers: ['Alt'] }],
         precedence: CONST.KEYBINDING_PRECEDENCE.PRIORITY,
         onDown: () =>
         {
@@ -207,6 +207,15 @@ Hooks.on("ready", () =>
 
         const activeElement = document.activeElement;
         if (!(activeElement instanceof HTMLElement) || !root.contains(activeElement)) return;
+
+        if (event.type === "keydown" && isSaveKeybindingsShortcut(event))
+        {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation?.();
+            saveKeybindingsConfig(root);
+            return;
+        }
 
         const inBindingControls = !!activeElement.closest('.form-group[data-action-id] .form-fields, .form-group[data-action-id] li[data-binding-id]');
         if (!inBindingControls) return;
@@ -305,10 +314,10 @@ async function migrateLegacyDefaultKeybindings()
         {
             action: "foundry-navigator.openMyCharacterSheet",
             legacy: [
-                [{ key: "KeyC", modifiers: ["Alt"] }],
+                [{ key: "KeyC", modifiers: [] }],
                 [{ key: "KeyC", modifiers: ["Alt", "Shift"] }],
             ],
-            replacement: [{ key: "KeyC", modifiers: [] }],
+            replacement: [{ key: "KeyC", modifiers: ["Alt"] }],
         },
     ];
 
@@ -467,11 +476,63 @@ function getKeybindingsConfigRoot()
     return document.querySelector('.keybindings-config, [data-application-class*="KeybindingsConfig"]');
 }
 
+function isSaveKeybindingsShortcut(event)
+{
+    return event.key?.toLowerCase?.() === "s"
+        && event.ctrlKey
+        && !event.altKey
+        && !event.metaKey;
+}
+
 function isKeybindingCaptureInput(element)
 {
     return element instanceof HTMLInputElement
         && element.type === "text"
         && /\.binding\.\d+$/.test(element.name ?? "");
+}
+
+function getKeybindingsSaveButton(root = getKeybindingsConfigRoot())
+{
+    if (!(root instanceof HTMLElement)) return null;
+
+    const selectors = [
+        'button[type="submit"]:not([disabled])',
+        'button[data-action="save"]:not([disabled])',
+        'button[data-action="submit"]:not([disabled])',
+        'button[name="submit"]:not([disabled])',
+        'footer button:not([disabled])',
+        '.form-footer button:not([disabled])',
+        '.window-content button:not([disabled])',
+    ];
+
+    const buttons = [...root.querySelectorAll(selectors.join(', '))]
+        .filter(button => button instanceof HTMLButtonElement);
+
+    return buttons.find(button => /save|submit|apply/i.test(button.textContent ?? button.getAttribute("aria-label") ?? ""))
+        ?? buttons.find(button => button.type === "submit")
+        ?? null;
+}
+
+function saveKeybindingsConfig(root = getKeybindingsConfigRoot())
+{
+    const saveButton = getKeybindingsSaveButton(root);
+    if (saveButton)
+    {
+        saveButton.click();
+        announceAssertive("Configure Controls saved.");
+        return true;
+    }
+
+    const form = root?.querySelector?.("form");
+    if (form instanceof HTMLFormElement)
+    {
+        form.requestSubmit();
+        announceAssertive("Configure Controls saved.");
+        return true;
+    }
+
+    announceAssertive("Could not find the Configure Controls save button.");
+    return false;
 }
 
 function getKeybindingControls(root = getKeybindingsConfigRoot())

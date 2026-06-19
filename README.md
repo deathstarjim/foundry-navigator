@@ -68,14 +68,14 @@ Announcement features are configurable per player, so each user can enable the f
 - `Shift+Enter` targets the current keyboard token
 - `Alt+Shift+T` targets the hovered token as a screen-reader-friendly alternative to Foundry's native `T`
 - `Alt+Shift+W` announces the controlled token's grid position, HP, and active conditions
-- `C` opens the controlled token's actor sheet or the current player's assigned character sheet
+- `Alt+C` opens the controlled token's actor sheet or the current player's assigned character sheet
 
 ### Helpful Keyboard Shortcuts
 
 - `Alt+Shift+H`: return focus to the active sheet tab
 - `Alt+Shift+R`: re-read the latest roll result
 - `Alt+1` through `Alt+9`: read recent roll history, newest first
-- `C`: open your current character sheet, with a module fallback when Foundry cannot resolve it
+- `Alt+C`: open your current character sheet, with a module fallback when Foundry cannot resolve it
 - `Alt+Shift+A`: open Foundry Navigator settings
 - `Alt+Shift+K`: open Configure Controls
 - `Alt+Shift+P`: pause or unpause the game as a GM-friendly alternative to Space
@@ -84,7 +84,7 @@ Announcement features are configurable per player, so each user can enable the f
 - `Shift+Enter`: target the current keyboard token
 - `Alt+Shift+T`: target or untarget the hovered token without replacing Foundry's native `T`
 
-Module shortcuts can be changed through Foundry's Configure Controls screen. Known older defaults are migrated automatically, while user-created remappings are preserved.
+Module shortcuts can be changed through Foundry's Configure Controls screen. Known older defaults are migrated automatically, while user-created remappings are preserved. While Configure Controls is open, `Ctrl+S` saves the dialog and `Alt+Backspace` or `Alt+Escape` cancels a stuck binding capture.
 
 ## Installation
 

@@ -221,6 +221,33 @@ test("Alt+Shift+P registers as an alternate GM pause binding", async ({ page }) 
     expect(binding.hasTogglePause).toBe(true);
 });
 
+test("Alt+C registers as the character sheet shortcut", async ({ page }) =>
+{
+    await joinAsTester(page);
+
+    const binding = await page.evaluate(() =>
+    {
+        const action = "foundry-navigator.openMyCharacterSheet";
+        return {
+            configured: game.keybindings.get("foundry-navigator", "openMyCharacterSheet"),
+            active: (game.keybindings.activeKeys.get("KeyC") ?? [])
+                .filter(candidate => candidate.action === action)
+                .map(candidate => ({
+                    action: candidate.action,
+                    requiredModifiers: candidate.requiredModifiers,
+                })),
+        };
+    });
+
+    expect(binding.configured).toEqual([
+        { key: "KeyC", modifiers: ["Alt"] },
+    ]);
+    expect(binding.active).toContainEqual({
+        action: "foundry-navigator.openMyCharacterSheet",
+        requiredModifiers: ["Alt"],
+    });
+});
+
 test("structured roll history narrates matching attack and damage cards", async ({ page }) =>
 {
     await joinAsTester(page);

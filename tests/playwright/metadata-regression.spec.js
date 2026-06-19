@@ -76,7 +76,9 @@ test("module shortcuts avoid browser and Foundry core conflicts", () =>
     expect(screenreader).toContain("editable: [{ key: 'KeyW', modifiers: ['Alt', 'Shift'] }]");
     expect(screenreader).toContain("editable: [{ key: 'KeyP', modifiers: ['Alt', 'Shift'] }]");
     expect(screenreader).toContain("async function toggleGamePause()");
-    expect(screenreader).toContain("editable: [{ key: 'KeyC' }]");
+    expect(screenreader).toContain("editable: [{ key: 'KeyC', modifiers: ['Alt'] }]");
+    expect(screenreader).toContain("function saveKeybindingsConfig");
+    expect(screenreader).toContain('event.key?.toLowerCase?.() === "s"');
     expect(screenreader).toContain("precedence: CONST.KEYBINDING_PRECEDENCE.PRIORITY");
     expect(bootstrap).toContain('editable: [{ key: "KeyH", modifiers: ["Alt", "Shift"] }]');
     expect(canvasKeyboard).toContain('editable: [{ key: "KeyT", modifiers: ["Alt", "Shift"] }]');
