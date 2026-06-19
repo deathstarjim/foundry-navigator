@@ -11,11 +11,11 @@ The module is designed to reduce reliance on mouse-only controls, hover interact
 - Default D&D 5e actor sheets
 - Tidy 5e Sheets, including the modern layout
 
-## What's New in v0.15.0
+## What's New in v0.16.0
 
-- HP and damage announcements now include currently targeted visible tokens without exposing exact totals or temporary HP for unowned actors
-- `Alt+Shift+T` provides a screen-reader-friendly alternate shortcut for targeting the hovered token
-- Foundry's native `T` target shortcut remains unchanged for other players
+- `Alt+1` through `Alt+9` read recent roll history, newest first
+- Attack and damage cards are combined into richer summaries when Foundry exposes target and damage details
+- `Alt+Shift+R` remains available as the configurable fallback for reading the latest roll
 
 ## Feature Overview
 
@@ -74,9 +74,11 @@ Announcement features are configurable per player, so each user can enable the f
 
 - `Alt+Shift+H`: return focus to the active sheet tab
 - `Alt+Shift+R`: re-read the latest roll result
+- `Alt+1` through `Alt+9`: read recent roll history, newest first
 - `C`: open your current character sheet, with a module fallback when Foundry cannot resolve it
 - `Alt+Shift+A`: open Foundry Navigator settings
 - `Alt+Shift+K`: open Configure Controls
+- `Alt+Shift+P`: pause or unpause the game as a GM-friendly alternative to Space
 - `Alt+Shift+W`: announce the controlled token's position, HP, and conditions
 - `Enter`: open the current keyboard token's actor sheet
 - `Shift+Enter`: target the current keyboard token

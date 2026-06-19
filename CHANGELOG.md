@@ -1,3 +1,9 @@
+### v0.16.0
+
+- Added structured roll history shortcuts: `Alt+1` reads the most recent roll event, through `Alt+9` for older roll results.
+- Improved roll-result narration by combining matching attack and damage cards into a more useful summary when target and damage details are available.
+- Added `Alt+Shift+P` as a configurable GM pause/unpause shortcut for screen-reader users when Space is intercepted.
+
 ### v0.15.0
 
 - Extended HP/damage announcements to currently targeted visible tokens while withholding exact HP totals and temporary HP details for unowned actors.
@@ -14,7 +20,7 @@
 - Added HP/damage change announcements for owned actors via `announceHpChanges` setting: screen reader announces damage taken, healing received, and temporary HP changes including current HP totals.
 - Added condition/status effect announcements via `announceConditions` setting: screen reader announces when active effects or statuses are applied to or removed from owned actors, with deduplication to prevent double-firing.
 
-### v1.0.1
+### v0.13.0
 
 - Renamed and normalized the module around the `foundry-navigator` ID so Foundry settings and keybindings resolve correctly after the module rename.
 - Fixed stale internal module-ID references that were preventing the module from appearing reliably under `Foundry Navigator` in Configure Settings.

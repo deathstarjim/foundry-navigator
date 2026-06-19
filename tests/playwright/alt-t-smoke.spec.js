@@ -192,6 +192,111 @@ test("Alt+Shift+T registers as an alternate target binding", async ({ page }) =>
     });
 });
 
+test("Alt+Shift+P registers as an alternate GM pause binding", async ({ page }) =>
+{
+    await joinAsTester(page);
+
+    const binding = await page.evaluate(() =>
+    {
+        const action = "foundry-navigator.toggleGamePause";
+        return {
+            configured: game.keybindings.get("foundry-navigator", "toggleGamePause"),
+            active: (game.keybindings.activeKeys.get("KeyP") ?? [])
+                .filter(candidate => candidate.action === action)
+                .map(candidate => ({
+                    action: candidate.action,
+                    requiredModifiers: candidate.requiredModifiers,
+                })),
+            hasTogglePause: typeof game.togglePause === "function",
+        };
+    });
+
+    expect(binding.configured).toEqual([
+        { key: "KeyP", modifiers: ["Alt", "Shift"] },
+    ]);
+    expect(binding.active).toContainEqual({
+        action: "foundry-navigator.toggleGamePause",
+        requiredModifiers: ["Alt", "Shift"],
+    });
+    expect(binding.hasTogglePause).toBe(true);
+});
+
+test("structured roll history narrates matching attack and damage cards", async ({ page }) =>
+{
+    await joinAsTester(page);
+
+    const result = await page.evaluate(() =>
+    {
+        const helpers = globalThis.FoundryNavigatorRollHistory;
+        if (!helpers) return null;
+
+        const createRoot = (html) =>
+        {
+            const root = document.createElement("div");
+            root.innerHTML = html;
+            return root;
+        };
+
+        const attackRoot = createRoot(`
+            <div class="dice-flavor">Dagger Melee Attack • Melee Weapon</div>
+            <div class="dice-formula">1d20 + 2 + 2</div>
+            <div class="dice-total">22</div>
+        `);
+        const damageRoot = createRoot(`
+            <div class="dice-flavor">Dagger Damage Roll</div>
+            <div class="dice-formula">1d4 + 2</div>
+            <div class="dice-total">4</div>
+            <ol class="targets">
+                <li>
+                    <strong>Tester the Barbarian</strong>
+                    <span class="value">-2</span>
+                </li>
+            </ol>
+        `);
+        const baseMessage = {
+            speaker: { alias: "Goblin Minion" },
+            visible: true,
+            isContentVisible: true,
+        };
+        const attack = helpers.getRollEntryFromMessage({
+            ...baseMessage,
+            id: "attack",
+            timestamp: 1,
+            flavor: "Dagger Melee Attack • Melee Weapon",
+            rolls: [{ total: 22, formula: "1d20 + 2 + 2" }],
+        }, attackRoot);
+        const damage = helpers.getRollEntryFromMessage({
+            ...baseMessage,
+            id: "damage",
+            timestamp: 2,
+            flavor: "Dagger Damage Roll",
+            rolls: [{ total: 4, formula: "1d4 + 2" }],
+        }, damageRoot);
+
+        attack.damageApplications = damage.damageApplications;
+        attack.damageTotal = damage.totals[0];
+        attack.damageFormula = damage.formula;
+        attack.targets = damage.damageApplications.map(application => application.target);
+
+        return {
+            attack,
+            damage,
+            narration: helpers.getStructuredRollNarration(attack, 0),
+        };
+    });
+
+    expect(result).not.toBeNull();
+    expect(result.attack.item).toBe("Dagger");
+    expect(result.attack.kind).toBe("attack");
+    expect(result.damage.kind).toBe("damage");
+    expect(result.damage.damageApplications).toEqual([
+        { target: "Tester the Barbarian", amount: 2 },
+    ]);
+    expect(result.narration).toBe(
+        "Most recent roll: Goblin Minion attacked Tester the Barbarian with Dagger. Rolled 22. Tester the Barbarian took 2 damage."
+    );
+});
+
 async function logUserCharacterDiagnostics(page, actorName = "Tester the Brave")
 {
     const diagnostics = await page.evaluate((name) =>

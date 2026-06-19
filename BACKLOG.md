@@ -41,7 +41,7 @@ Implementation principle: preserve Foundry D&D 5e's native level-up and advancem
 - [x] **Token enter/leave scene** - announce when a token is added to or removed from the canvas (for example "Goblin King has entered the scene.").
 - [x] **HP / damage changes** - damage, healing, temporary HP, and current totals are announced for owned actors. Damage and healing are also announced for currently targeted visible tokens without exposing unowned actors' exact HP or temporary HP.
 - [x] **Status effects / conditions** - announce when a condition is applied to or removed from an owned token (for example "Prone applied to Thorin." / "Frightened 1 removed.").
-- [x] **Dice roll results** - announce the result and total of any roll in chat (for example "Attack roll: 17."). Includes an `Alt+Shift+R` fallback to re-read the latest roll result from chat on demand.
+- [x] **Dice roll results** - announce the result and total of any roll in chat (for example "Attack roll: 17."). Includes an `Alt+Shift+R` fallback to re-read the latest roll result from chat on demand, plus `Alt+1` through `Alt+9` structured roll-history shortcuts.
 - [x] **Combat tunnel step narration** - expand the existing dialog narration so target selection, attack confirmation, damage application, and recovery/focus transitions are consistently announced from start to finish.
 
 ---

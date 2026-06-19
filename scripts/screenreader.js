@@ -122,28 +122,25 @@ Hooks.on("init", () =>
 
     game.keybindings.register('foundry-navigator', 'readLastRollResult', {
         name: 'Read Last Roll Result',
-        hint: 'Announces the most recent roll result from chat.',
+        hint: 'Announces the most recent roll result from chat. Alt+1 through Alt+9 read recent roll history directly.',
         editable: [{ key: 'KeyR', modifiers: ['Alt', 'Shift'] }],
         onDown: () =>
         {
-            const message = getLatestRollMessage();
-            if (!message)
-            {
-                announceAssertive("No recent roll result found in chat.");
-                return true;
-            }
-
-            const announcement = getRollAnnouncement(message) || getChatMessageAnnouncement(message);
-            if (!announcement)
-            {
-                announceAssertive("Could not read the latest roll result.");
-                return true;
-            }
-
-            announceAssertive(announcement);
-            return true;
+            return readRollHistoryEntry(0);
         },
     });
+
+    for (let index = 1; index <= 9; index++)
+    {
+        game.keybindings.register('foundry-navigator', `readRollHistory${index}`, {
+            name: `Read Roll History ${index}`,
+            hint: index === 1
+                ? 'Announces the most recent structured roll result from chat.'
+                : `Announces roll result ${index} from recent chat roll history.`,
+            editable: [{ key: `Digit${index}`, modifiers: ['Alt'] }],
+            onDown: () => readRollHistoryEntry(index - 1),
+        });
+    }
 
     game.keybindings.register('foundry-navigator', 'openNavigatorSettings', {
         name: 'Open Foundry Navigator Settings',
@@ -163,6 +160,17 @@ Hooks.on("init", () =>
         onDown: () =>
         {
             void openConfigureControls();
+            return true;
+        },
+    });
+
+    game.keybindings.register('foundry-navigator', 'toggleGamePause', {
+        name: 'Toggle Game Pause',
+        hint: "Pauses or unpauses the game without using Foundry's Space shortcut. Default: Alt+Shift+P. Only GMs can pause or unpause the game.",
+        editable: [{ key: 'KeyP', modifiers: ['Alt', 'Shift'] }],
+        onDown: () =>
+        {
+            void toggleGamePause();
             return true;
         },
     });
@@ -389,6 +397,7 @@ globalThis.FoundryNavigatorAnnounce = {
 };
 
 const FN_ANNOUNCED_ROLL_MESSAGES = new Map();
+const FN_ROLL_HISTORY = [];
 const FN_PREUPDATE_HP = new Map();
 const FN_CONDITION_ANNOUNCEMENT_CACHE = new Map();
 const FN_SETTINGS_ANNOUNCEMENT_CACHE = new Map();
@@ -414,6 +423,26 @@ function normalizeAnnouncementText(text)
 function getSpeakerName(message)
 {
     return message.speaker?.alias || message.author?.name || game.i18n.localize("Unknown");
+}
+
+async function toggleGamePause()
+{
+    if (!game.user?.isGM)
+    {
+        announceAssertive("Only the GM can pause or unpause the game.");
+        return false;
+    }
+
+    if (typeof game.togglePause !== "function")
+    {
+        announceAssertive("Could not toggle game pause.");
+        return false;
+    }
+
+    const shouldPause = !game.paused;
+    await game.togglePause(shouldPause, true);
+    announceAssertive(shouldPause ? "Game paused." : "Game unpaused.");
+    return true;
 }
 
 function getModuleSettingsTabButton(moduleId)
@@ -826,9 +855,9 @@ function getChatCardTargets(root)
     return targets;
 }
 
-function getAppliedDamageSummary(root)
+function getAppliedDamageApplications(root)
 {
-    if (!(root instanceof HTMLElement)) return null;
+    if (!(root instanceof HTMLElement)) return [];
 
     const rows = root.querySelectorAll([
         "damage-application .targets .target",
@@ -866,11 +895,233 @@ function getAppliedDamageSummary(root)
         const amount = Math.abs(Number(numericMatch[0]));
         if (!Number.isFinite(amount)) continue;
 
-        results.push(`${name} ${amount} damage`);
+        results.push({ target: name, amount });
     }
 
-    if (!results.length) return null;
-    return results.join(", ");
+    return results;
+}
+
+function getAppliedDamageSummary(root)
+{
+    const applications = getAppliedDamageApplications(root);
+    if (!applications.length) return null;
+    return applications
+        .map(application => `${application.target} ${application.amount} damage`)
+        .join(", ");
+}
+
+function getMessageRoot(message, root = null)
+{
+    if (root instanceof HTMLElement) return root;
+
+    const content = message?.content ?? "";
+    if (typeof content !== "string" || !content) return null;
+
+    const container = document.createElement("div");
+    container.innerHTML = content;
+    return container;
+}
+
+function getRollTotals(message, root = null)
+{
+    const totals = [
+        ...new Set(
+            [
+                ...root?.querySelectorAll?.(".dice-total") ?? [],
+            ]
+                .map(element => normalizeAnnouncementText(element.textContent))
+                .filter(Boolean)
+        ),
+    ];
+
+    if (!totals.length && Array.isArray(message?.rolls))
+    {
+        for (const roll of message.rolls)
+        {
+            const total = roll?.total;
+            if (total === undefined || total === null) continue;
+            totals.push(String(total));
+        }
+    }
+
+    return totals;
+}
+
+function getRollFormula(message, root = null)
+{
+    const formula = normalizeAnnouncementText(root?.querySelector(".dice-formula")?.textContent ?? "");
+    if (formula) return formula;
+
+    const roll = Array.isArray(message?.rolls) ? message.rolls[0] : null;
+    return normalizeAnnouncementText(roll?.formula ?? "");
+}
+
+function cleanRollItemName(flavor)
+{
+    const text = normalizeAnnouncementText(flavor);
+    if (!text) return "";
+
+    const split = text.split(/\s+(?:Melee|Ranged|Spell|Weapon|Attack|Damage|Healing|Save|Check|Roll)\b/i)[0]?.trim();
+    return split || text;
+}
+
+function getRollKind(flavor)
+{
+    if (/damage/i.test(flavor)) return "damage";
+    if (/healing|heal/i.test(flavor)) return "healing";
+    if (/attack/i.test(flavor)) return "attack";
+    if (/save/i.test(flavor)) return "save";
+    if (/check|skill|ability/i.test(flavor)) return "check";
+    return "roll";
+}
+
+function getRollEntryFromMessage(message, root = null)
+{
+    if (!message) return null;
+    if (message.visible === false || message.isContentVisible === false) return null;
+
+    const messageRoot = getMessageRoot(message, root);
+    const totals = getRollTotals(message, messageRoot);
+    if (!totals.length) return null;
+
+    const flavor = normalizeAnnouncementText(
+        messageRoot?.querySelector(".dice-flavor")?.textContent
+        || message.flavor
+        || ""
+    );
+    const damageApplications = getAppliedDamageApplications(messageRoot);
+
+    return {
+        id: message.id ?? message.uuid ?? `${message.timestamp ?? Date.now()}`,
+        timestamp: Number(message.timestamp ?? Date.now()),
+        speaker: getSpeakerName(message),
+        flavor,
+        item: cleanRollItemName(flavor),
+        kind: getRollKind(flavor),
+        formula: getRollFormula(message, messageRoot),
+        totals,
+        targets: getChatCardTargets(messageRoot),
+        damageApplications,
+    };
+}
+
+function canMergeDamageIntoAttack(attackEntry, damageEntry)
+{
+    if (!attackEntry || !damageEntry) return false;
+    if (attackEntry.kind !== "attack" || damageEntry.kind !== "damage") return false;
+    if (attackEntry.speaker !== damageEntry.speaker) return false;
+    if (attackEntry.damageApplications?.length) return false;
+    if (!damageEntry.damageApplications?.length) return false;
+
+    const attackItem = attackEntry.item || attackEntry.flavor;
+    const damageItem = damageEntry.item || damageEntry.flavor;
+    return !attackItem || !damageItem || attackItem === damageItem;
+}
+
+function rebuildRollHistory()
+{
+    FN_ROLL_HISTORY.length = 0;
+    const messages = game.messages?.contents;
+    if (!Array.isArray(messages)) return FN_ROLL_HISTORY;
+
+    const sortedMessages = [...messages].sort((a, b) => Number(a.timestamp ?? 0) - Number(b.timestamp ?? 0));
+    for (const message of sortedMessages)
+    {
+        const entry = getRollEntryFromMessage(message);
+        if (!entry) continue;
+
+        const matchingAttack = [...FN_ROLL_HISTORY].reverse().find(candidate => canMergeDamageIntoAttack(candidate, entry));
+        if (matchingAttack)
+        {
+            matchingAttack.damageApplications = entry.damageApplications;
+            matchingAttack.damageTotal = entry.totals[0] ?? null;
+            matchingAttack.damageFormula = entry.formula;
+            matchingAttack.timestamp = Math.max(matchingAttack.timestamp, entry.timestamp);
+            matchingAttack.targets = matchingAttack.targets.length ? matchingAttack.targets : entry.damageApplications.map(application => application.target);
+            continue;
+        }
+
+        FN_ROLL_HISTORY.push(entry);
+    }
+
+    FN_ROLL_HISTORY.sort((a, b) => b.timestamp - a.timestamp);
+    FN_ROLL_HISTORY.splice(9);
+    return FN_ROLL_HISTORY;
+}
+
+function formatDamageApplications(applications)
+{
+    if (!applications?.length) return "";
+    return applications
+        .map(application => `${application.target} took ${application.amount} damage`)
+        .join(", ");
+}
+
+function getStructuredRollNarration(entry, index = 0)
+{
+    if (!entry) return null;
+
+    const prefix = index === 0 ? "Most recent roll" : `Roll ${index + 1}`;
+    const total = entry.totals?.[0] ?? null;
+    const target = entry.damageApplications?.[0]?.target ?? entry.targets?.[0] ?? "";
+    const item = entry.item || entry.flavor;
+    const damageText = formatDamageApplications(entry.damageApplications);
+
+    if (entry.kind === "attack" && damageText)
+    {
+        let announcement = `${prefix}: ${entry.speaker} attacked`;
+        if (target) announcement += ` ${target}`;
+        if (item) announcement += ` with ${item}`;
+        announcement += ".";
+        if (total) announcement += ` Rolled ${total}.`;
+        announcement += ` ${damageText}.`;
+        return announcement;
+    }
+
+    if (entry.kind === "attack")
+    {
+        let announcement = `${prefix}: ${entry.speaker} attacked`;
+        if (target) announcement += ` ${target}`;
+        if (item) announcement += ` with ${item}`;
+        if (total) announcement += `. Rolled ${total}.`;
+        else announcement += ".";
+        return announcement;
+    }
+
+    if (entry.kind === "damage" && damageText)
+    {
+        const parts = [`${prefix}: ${entry.speaker} rolled damage`];
+        if (item) parts.push(`with ${item}`);
+        if (total) parts.push(`for ${total}`);
+        parts.push(`${damageText}.`);
+        return parts.join(" ").replace(/\s+\./g, ".");
+    }
+
+    const parts = [`${prefix}: ${entry.speaker}`];
+    if (entry.flavor) parts.push(entry.flavor);
+    if (total) parts.push(`Total ${total}.`);
+    return parts.join(". ").replace(/\.\s+\./g, ". ");
+}
+
+function readRollHistoryEntry(index)
+{
+    const history = rebuildRollHistory();
+    const entry = history[index];
+    if (!entry)
+    {
+        announceAssertive(index === 0 ? "No recent roll result found in chat." : `No roll result ${index + 1} found in recent chat history.`);
+        return true;
+    }
+
+    const announcement = getStructuredRollNarration(entry, index);
+    if (!announcement)
+    {
+        announceAssertive("Could not read that roll result.");
+        return true;
+    }
+
+    announceAssertive(announcement);
+    return true;
 }
 
 function getRollAnnouncement(message, root)
@@ -882,25 +1133,7 @@ function getRollAnnouncement(message, root)
         || ""
     );
 
-    const totals = [
-        ...new Set(
-            [
-                ...root?.querySelectorAll?.(".dice-total") ?? [],
-            ]
-                .map(element => normalizeAnnouncementText(element.textContent))
-                .filter(Boolean)
-        ),
-    ];
-
-    if (!totals.length && Array.isArray(message.rolls))
-    {
-        for (const roll of message.rolls)
-        {
-            const total = roll?.total;
-            if (total === undefined || total === null) continue;
-            totals.push(String(total));
-        }
-    }
+    const totals = getRollTotals(message, root);
 
     if (!totals.length) return null;
 
@@ -937,6 +1170,12 @@ function getLatestRollMessage()
         return typeof content === "string" && /dice-total|dice-roll|dice-result/.test(content);
     }) ?? null;
 }
+
+globalThis.FoundryNavigatorRollHistory = {
+    rebuildRollHistory,
+    getRollEntryFromMessage,
+    getStructuredRollNarration,
+};
 
 function getNavigatorSettingsPanel(moduleId)
 {
@@ -1318,6 +1557,8 @@ globalThis.FoundryNavigatorGrid = { getGridLabel, getHPString, getConditionsStri
 
 Hooks.on("createChatMessage", (message) =>
 {
+    rebuildRollHistory();
+
     if (game.settings.get('foundry-navigator', 'announceRollResults') && (message.isRoll || message.rolls?.length))
     {
         announceRollResult(message);
@@ -1331,6 +1572,8 @@ Hooks.on("createChatMessage", (message) =>
 
 Hooks.on("updateChatMessage", (message, changed) =>
 {
+    rebuildRollHistory();
+
     if (!game.settings.get('foundry-navigator', 'announceRollResults')) return;
     if (!("rolls" in changed) && !("content" in changed) && !("flavor" in changed)) return;
     if (!(message.isRoll || message.rolls?.length)) return;
@@ -1344,6 +1587,7 @@ Hooks.on("renderChatMessageHTML", (message, html) =>
     if (!root) return;
     if (!(message.isRoll || message.rolls?.length || root.querySelector(".dice-roll, .dice-result, .dice-total"))) return;
 
+    rebuildRollHistory();
     announceRollResult(message, root);
 });
 
